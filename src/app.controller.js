@@ -6,7 +6,7 @@ import authrouter from "./module/auth/auth.controller.js"
 import messagerouter from "./module/message/message.controller.js"
 import userrouter from "./module/user/user.controller.js"
 import { redisclient } from "./utils/Redis/Redis.connect.js"
-import rateLimit from "express-rate-limit"
+import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 import { auth } from "./middleware/authentication.middleware.js"
 import RedisStore from "rate-limit-redis"
 
@@ -43,18 +43,21 @@ import RedisStore from "rate-limit-redis"
     app.use(rateLimit({
         windowMs:20*1000,
         limit:5,
-        keyGenerator:(req)=>{
-        const key=req.user?req.user._id.toString():req.ip
-        console.log({key});
-        return key
-        
-        },
-        store:new RedisStore({
-            sendCommand:(...args)=>redisclient.sendCommand(args)
-        }),
-        handler:(req,res)=>{
-            res.status(429).json({message:"wait a few second"})
+        keyGenerator:(req,res)=>{
+            return ipKeyGenerator(req)
         }
+        // keyGenerator:(req)=>{
+        // const key=req.user?req.user._id.toString():req.ip
+        // console.log({key});
+        // return key
+        
+        // },
+        // store:new RedisStore({
+        //     sendCommand:(...args)=>redisclient.sendCommand(args)
+        // }),
+        // handler:(req,res)=>{
+        //     res.status(429).json({message:"wait a few second"})
+        // }
 
     }))
     app.use(express.json())

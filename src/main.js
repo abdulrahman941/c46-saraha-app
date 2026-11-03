@@ -1,4 +1,4 @@
-import  bootstrap  from "./src/app.controller.js"
+import  bootstrap  from "./app.controller.js"
 import dotenv from "dotenv"
 import express from "express"
 
@@ -11,3 +11,5 @@ bootstrap(app,express)
 app.listen(port,()=>{
     `app is listening on port ${port}`
 })
+
+export default app
