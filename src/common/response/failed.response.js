@@ -28,49 +28,17 @@ export const InternalServerErrorException = ({message="Internal Server Error",ex
       return ErrorResponse({status:500,message:message,extra:extra})
       }   
 
-      
-export const globalhandlingerror = (err, req, res, next) => {
-    // 1. طباعة الخطأ في الـ Console للـ Debugging
-    console.log("Error Stack:", err.stack);
-    console.log("Error Cause:", err.cause);
-
-    // 2. تحديد بيئة العمل (تأكد من استخدام process.env.NODE_ENV)
-    const currentMode = process.env.NODE_ENV || "dev";
-    const isDev = currentMode === "dev" || currentMode === "development";
-
-    // 3. استخراج الـ Status بمرونة فائقة من كل الأماكن المحتملة
-    const statusCode = err.status || err.statusCode || err.cause?.status || 500;
-
-    // 4. تحديد الرسالة والـ Stack بناءً على البيئة
-    const errorMessage = err.message || "something went wrong";
+export const globalhandlingerror=(err,req,res,next)=>{
+    console.log(err.stack,"from error stack");
+    const mood=env.mood=="dev"
+    console.log(mood);
+    const status=err.status ?err.status:err.cause?err.cause.status:500
+    const defaultMessage="something went wrong"
+    const displayErrorMessage=err.message||defaultMessage
     
-    return res.status(statusCode).json({
-        success: false,
-        message: errorMessage,
-        // إظهار الـ extra لو وُجدت داخل الـ cause
-        extra: err.cause?.extra || null, 
-        // الـ stack تظهر فقط في وضع الـ dev لتجنب تسريب معلومات الحماية في الإنتاج
-        stack: isDev ? err.stack : undefined 
-    });
-};
-
-
-
-
-
-
-
-// export const globalhandlingerror=(err,req,res,next)=>{
-//     console.log(err.stack,"from error stack");
-//     const mood=env.mood=="dev"
-//     console.log(mood);
-//     const status=err.status ?err.status:err.cause?err.cause.status:500
-//     const defaultMessage="something went wrong"
-//     const displayErrorMessage=err.message||defaultMessage
-    
-//    console.log(err.cause,"from test status");
-//    return res.status(status).json({
-//     stack:mood?err.stack:null,
-//     message:mood?displayErrorMessage:defaultMessage
-// })
-// }
+   console.log(err.cause,"from test status");
+   return res.status(status).json({
+    stack:mood?err.stack:null,
+    message:mood?displayErrorMessage:defaultMessage
+})
+}
