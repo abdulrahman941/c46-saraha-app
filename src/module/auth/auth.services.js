@@ -132,6 +132,8 @@ export const Resetpassword=async(req,res)=>{
 export const updatepassword=async(req,res)=>{
 try {
   const user=req.user
+  console.log(user);
+  
 const{oldpassword,newpassword}=req.body
 if(!await compare(oldpassword,user.password)){
 throw BadRequestException("in-valid old password")
@@ -143,17 +145,7 @@ return successResponse({
     message:"user update password successfully"
 })
 } catch (error) {
-  console.log("actual error:", error);
-        
-        // الحل هنا: استخدم الـ status والـ message الخاصة بالخطأ الأصلي الذي قمت برميه (throw)
-        const statusCode = error.cause?.status || 500;
-        const errorMessage = error.message || "something went wrong";
-
-        return res.status(statusCode).json({
-            success: false,
-            message: errorMessage,
-            extra: error.cause?.extra
-        });
+  throw BadRequestException("not found api")
 }
 }
 
