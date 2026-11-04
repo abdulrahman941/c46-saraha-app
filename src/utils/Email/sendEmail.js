@@ -12,7 +12,7 @@ auth:{
 })
 
 const info=await transporter.sendMail({
-    from:"Hamada <abdulrahman.1999hemida@gmail.com>",
+    from:"Hemada <abdulrahman.1999hemida@gmail.com>",
     to,
     subject,
     html

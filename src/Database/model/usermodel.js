@@ -88,7 +88,17 @@ skills:[{
 is_deleted:{
     type:Boolean,
     default:false
-}},{
+},
+otp:{
+    type:String,
+    default:null,
+
+},
+otpExpire:{
+    type:Date,
+    default:null
+}
+},{
 timestamps:true,
 strict:true,
 strictQuery:true,

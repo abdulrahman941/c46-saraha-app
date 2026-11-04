@@ -68,30 +68,21 @@ export const forgetpassword=async(req,res)=>{
     if(!user){
        throw NotFoundException("user not found")
     }
-    const SaveOtp=await redisclient.get(forgetPasswordKey(user._id))
-    if(SaveOtp){
-        const ttl=await redisclient.ttl(forgetPasswordKey(user._id))
-        throw  BadRequestException(`wait ${ttl} seconds to resend otp`)
-    }
-    const otp=String(createOTP())
-    console.log("otp",otp);
+    const otp=createOTP().toString()
+    const otpExpire=Date.now()+10*60*1000
+    user.otp=otp
+    user.otpExpire=otpExpire
     
-    await redisclient.set(forgetPasswordKey(user._id),otp,{
-        expiration:{
-            type:"EX",
-            value:10*60
-        }
-    }) 
-
-    sendEmail({
-        to:email,
-        subject:"Forget Password",
-        html:generateHtml(otp)
+    await user.save()
+    await sendEmail({
+      to:user.email,
+      subject:"Reset password for saraha-app",
+      html:generateHtml(otp)
     })
-return successResponse({
-    res,
-    message:"Done"
-})
+    return successResponse({
+      res,
+      message:"send to verification code to email successfully"
+    })
    } catch (error) {
      console.log("actual error:", error);
         
@@ -110,24 +101,18 @@ return successResponse({
 
 export const Resetpassword=async(req,res)=>{
    try {
-    const {otp,password,email}=req.body
-   const user=await findOne({model:usermodel,filter:{email}})
+    const {otp,newpassword,email}=req.body
+   const user=await findOne({model:usermodel,filter:{email,otp,otpExpire:{$gt:Date.now()}}})
     if(!user){
        throw NotFoundException("user not found")
     }
-    const SaveOtp=await redisclient.get(forgetPasswordKey(user._id))
-    if(!SaveOtp){
-        throw BadRequestException("send otp first")
-    }
-    if(SaveOtp!=otp){
-        BadRequestException("invalid otp")
-    }
-    user.password=await hash(password,10)
-    await user.save()
-    return successResponse({
-        res,
-        message:"user Reset successfully"
-    })
+   const hashedPassword=await bcrypt.hash(newpassword,10)
+   
+   user.password=hashedPassword
+   user.otp=null
+   user.otpExpire=null
+   await user.save()
+   return successResponse({res,message:"change now for password successfully and you can login again"})
    } catch (error) {
     console.log("actual error:", error);
         
