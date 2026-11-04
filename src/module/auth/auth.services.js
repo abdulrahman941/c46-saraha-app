@@ -109,7 +109,8 @@ return successResponse({
 }
 
 export const Resetpassword=async(req,res)=>{
-   const {otp,password,email}=req.body
+   try {
+    const {otp,password,email}=req.body
    const user=await findOne({model:usermodel,filter:{email}})
     if(!user){
        throw NotFoundException("user not found")
@@ -124,13 +125,28 @@ export const Resetpassword=async(req,res)=>{
     user.password=await hash(password,10)
     await user.save()
     return successResponse({
-        res
+        res,
+        message:"user Reset successfully"
     })
+   } catch (error) {
+    console.log("actual error:", error);
+        
+        // الحل هنا: استخدم الـ status والـ message الخاصة بالخطأ الأصلي الذي قمت برميه (throw)
+        const statusCode = error.cause?.status || 500;
+        const errorMessage = error.message || "something went wrong";
+
+        return res.status(statusCode).json({
+            success: false,
+            message: errorMessage,
+            extra: error.cause?.extra
+        });
+   }
 
 }
 
 export const updatepassword=async(req,res)=>{
-const user=req.user
+try {
+  const user=req.user
 const{oldpassword,newpassword}=req.body
 if(!await compare(oldpassword,user.password)){
 throw BadRequestException("in-valid old password")
@@ -138,8 +154,22 @@ throw BadRequestException("in-valid old password")
 user.password=await hash(newpassword,10)
 await user.save()
 return successResponse({
-    res
+    res,
+    message:"user update password successfully"
 })
+} catch (error) {
+  console.log("actual error:", error);
+        
+        // الحل هنا: استخدم الـ status والـ message الخاصة بالخطأ الأصلي الذي قمت برميه (throw)
+        const statusCode = error.cause?.status || 500;
+        const errorMessage = error.message || "something went wrong";
+
+        return res.status(statusCode).json({
+            success: false,
+            message: errorMessage,
+            extra: error.cause?.extra
+        });
+}
 }
 
 export const loginwithgoogle = async (req, res, next) => {
