@@ -62,7 +62,7 @@ import RedisStore from "rate-limit-redis"
     }))
     app.use(express.json())
     app.get("/",(req,res,next)=>{
-        res.status(200).json("hello")
+        res.status(200).json({message:"hello abdulrahman welcome from new server"})
         next()
     })
 
